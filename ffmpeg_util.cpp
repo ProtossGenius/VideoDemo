@@ -67,6 +67,7 @@ FFmpegUtil::~FFmpegUtil() {
 void FFmpegUtil::Play(std::function<void(AVFrame *)> onFrame,
                       std::function<bool()>          shouldExist) {
     AVPacket packet; // 解码前的帧
+    av_seek_frame(pFormatCtx, 0, 0, 0);
     //主循环
     while (av_read_frame(pFormatCtx, &packet) >=
            0) { // FFMPEG 如果已经读到了一个帧

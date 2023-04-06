@@ -38,31 +38,33 @@ int main(int argc, char *argv[]) {
     }
 
     // SDL 视频格式与纹理初始化
-    pixformat = SDL_PIXELFORMAT_IYUV;
-    texture   = SDL_CreateTexture(renderer, pixformat,
-                                  SDL_TEXTUREACCESS_STREAMING, w_width, w_height);
-    util.Play(
-        [ texture, &rect, &util, renderer ](auto pFrame) {
-            // SDL 刷新纹理
-            SDL_UpdateYUVTexture(texture, NULL, pFrame->data[ 0 ],
-                                 pFrame->linesize[ 0 ], pFrame->data[ 1 ],
-                                 pFrame->linesize[ 1 ], pFrame->data[ 2 ],
-                                 pFrame->linesize[ 2 ]);
-            rect.x = 0; // SDL设置渲染目标的显示区域
-            rect.y = 0;
-            rect.w = util.getWidth();
-            rect.h = util.getHeight();
+    pixformat    = SDL_PIXELFORMAT_IYUV;
+    texture      = SDL_CreateTexture(renderer, pixformat,
+                                     SDL_TEXTUREACCESS_STREAMING, w_width, w_height);
+    auto onFrame = [ texture, &rect, &util, renderer ](auto pFrame) {
+        // SDL 刷新纹理
+        SDL_UpdateYUVTexture(texture, NULL, pFrame->data[ 0 ],
+                             pFrame->linesize[ 0 ], pFrame->data[ 1 ],
+                             pFrame->linesize[ 1 ], pFrame->data[ 2 ],
+                             pFrame->linesize[ 2 ]);
+        rect.x = 0; // SDL设置渲染目标的显示区域
+        rect.y = 0;
+        rect.w = util.getWidth();
+        rect.h = util.getHeight();
 
-            SDL_RenderClear(renderer); // SDL 清空渲染器内容
-            SDL_RenderCopy(renderer, texture, NULL,
-                           &rect);       // SDL 将纹理复制到渲染器
-            SDL_RenderPresent(renderer); // SDL 渲染
-        },
-        []() -> bool {
-            SDL_Event event;               // SDL事件
-            SDL_PollEvent(&event);         // 轮询事件
-            return event.type == SDL_QUIT; //如果窗口被关闭
-        });
+        SDL_RenderClear(renderer); // SDL 清空渲染器内容
+        SDL_RenderCopy(renderer, texture, NULL,
+                       &rect);       // SDL 将纹理复制到渲染器
+        SDL_RenderPresent(renderer); // SDL 渲染
+    };
+    auto shouldExist = []() -> bool {
+        SDL_Event event;               // SDL事件
+        SDL_PollEvent(&event);         // 轮询事件
+        return event.type == SDL_QUIT; //如果窗口被关闭
+    };
+
+    util.Play(onFrame, shouldExist);
+    util.Play(onFrame, shouldExist);
 
     if (texture) {
         SDL_DestroyTexture(texture);
