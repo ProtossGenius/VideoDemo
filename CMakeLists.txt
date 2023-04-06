@@ -41,6 +41,8 @@ target_sources(videodemo
     PRIVATE
     version.h
     version.cpp
+    ./ffmpeg_util.h 
+    ./ffmpeg_util.cpp
     )
 
 target_link_libraries(videodemo     
@@ -56,14 +58,10 @@ target_link_libraries(videodemo
     lzma 
     z
     )
-add_executable(main "")
-target_sources(main
-    PRIVATE
-    ./main.cpp
-    )
+add_executable(easy_video ./mains/easy_video.cpp)
 
 target_link_libraries(
-    main 
+    easy_video 
     videodemo
     )
 
